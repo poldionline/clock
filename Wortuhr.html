@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wortuhr</title>
+<style>
+:root{
+  --bg:#0c0d0f; --panel:#15171a; --off:#2a2d32; --on:#f4f1e8; --glow:rgba(244,241,232,.55); --ui:#9a9ca1; --uiOn:#f4f1e8;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){--bg:#e6e4df;--panel:#1b1c1f;--off:#33363b;--on:#fff;--glow:rgba(255,255,255,.6);--ui:#6b6d72;--uiOn:#111}
+}
+:root[data-theme="light"]{--bg:#e6e4df;--panel:#1b1c1f;--off:#33363b;--on:#fff;--glow:rgba(255,255,255,.6);--ui:#6b6d72;--uiOn:#111}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*{box-sizing:border-box}
+body{margin:0;height:100%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh;
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+.frame{
+  --s:min(92vw, 68vh, 620px);
+  width:var(--s);aspect-ratio:1;background:var(--panel);border-radius:calc(var(--s)*.03);
+  padding:calc(var(--s)*.075);position:relative;
+  box-shadow:0 calc(var(--s)*.03) calc(var(--s)*.08) rgba(0,0,0,.35);
+}
+.grid{width:100%;height:100%;display:grid;grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(10,1fr);
+  font-size:calc(var(--s)*.056);font-weight:600}
+.grid span{display:flex;align-items:center;justify-content:center;color:var(--off);
+  transition:color .8s ease,text-shadow .8s ease}
+.grid span.on{color:var(--on);text-shadow:0 0 .5em var(--glow)}
+.dot{position:absolute;width:calc(var(--s)*.022);height:calc(var(--s)*.022);border-radius:50%;
+  background:var(--off);transition:background .8s,box-shadow .8s}
+.dot.on{background:var(--on);box-shadow:0 0 .8em var(--glow)}
+.d0{left:calc(var(--s)*.03);top:calc(var(--s)*.03)}
+.d1{right:calc(var(--s)*.03);top:calc(var(--s)*.03)}
+.d2{right:calc(var(--s)*.03);bottom:calc(var(--s)*.03)}
+.d3{left:calc(var(--s)*.03);bottom:calc(var(--s)*.03)}
+.langs{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;max-width:92vw}
+.langs button{font:inherit;font-size:.95rem;color:var(--ui);background:none;border:1px solid transparent;
+  border-radius:2rem;padding:.45rem .9rem;cursor:pointer}
+.langs button[aria-pressed="true"]{color:var(--uiOn);border-color:var(--ui)}
+.langs button:focus-visible{outline:2px solid var(--uiOn);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.grid span,.dot{transition:none}}
+</style>
+</head>
+<body>
+<div class="frame" id="frame" title="Tippen: Hell/Dunkel">
+  <div class="grid" id="grid"></div>
+  <i class="dot d0"></i><i class="dot d1"></i><i class="dot d2"></i><i class="dot d3"></i>
+</div>
+<div class="langs" id="langs"></div>
+<script>
+const hours=(n)=>"h"+n;
+const L={};
+
+L.de={name:"Deutsch",rows:["ESKISTAFÜNF","ZEHNZWANZIG","DREIVIERTEL","VORFUNKNACH","HALBAELFÜNF","EINSXAMZWEI","DREIPMJVIER","SECHSNLACHT","SIEBENZWÖLF","ZEHNEUNKUHR"],
+W:{ES:[0,0,2],IST:[0,3,3],MF:[0,7,4],MZ:[1,0,4],ZWANZIG:[1,4,7],DREI:[2,0,4],VIERTEL:[2,4,7],VOR:[3,0,3],NACH:[3,7,4],HALB:[4,0,4],
+ h1:[5,0,4],h1e:[5,0,3],h2:[5,7,4],h3:[6,0,4],h4:[6,7,4],h5:[4,7,4],h6:[7,0,5],h7:[8,0,6],h8:[7,7,4],h9:[9,3,4],h10:[9,0,4],h11:[4,5,3],h12:[8,6,5],UHR:[9,8,3]},
+f(H,M){const q=M/5|0,w=["ES","IST"];let h=H%12||12;if(q>=5)h=h%12+1;
+ const t=[[ "UHR"],["MF","NACH"],["MZ","NACH"],["VIERTEL","NACH"],["ZWANZIG","NACH"],["MF","VOR","HALB"],["HALB"],["MF","NACH","HALB"],["ZWANZIG","VOR"],["DREI","VIERTEL"],["MZ","VOR"],["MF","VOR"]][q];
+ return w.concat(t,h===1&&q===0?"h1e":hours(h));}};
+
+L.sw={name:"Schwäbisch",rows:["ESKISCHFÜNF","ZEHNZWANZGU","VIERTLNACHW","VORHALBDREI","OINSSIEBENE","ZWOIZWÖLFEK","DREISECHSEM","VIEREACHTEP","NEUNEZEHNEB","ELFEFÜNFEHT"],
+W:{ES:[0,0,2],ISCH:[0,3,4],MF:[0,7,4],MZ:[1,0,4],ZWANZG:[1,4,6],VIERTL:[2,0,6],NACH:[2,6,4],VOR:[3,0,3],HALB:[3,3,4],DREI:[3,7,4],
+ h1:[4,0,4],h2:[5,0,4],h3:[6,0,4],h4:[7,0,5],h5:[9,4,5],h6:[6,4,6],h7:[4,4,7],h8:[7,5,5],h9:[8,0,5],h10:[8,5,5],h11:[9,0,4],h12:[5,4,6]},
+f(H,M){const q=M/5|0;let h=H%12||12;if(q>=5)h=h%12+1;
+ const t=[[],["MF","NACH"],["MZ","NACH"],["VIERTL","NACH"],["ZWANZG","NACH"],["MF","VOR","HALB"],["HALB"],["MF","NACH","HALB"],["ZWANZG","VOR"],["DREI","VIERTL"],["MZ","VOR"],["MF","VOR"]][q];
+ return ["ES","ISCH"].concat(t,hours(h));}};
+
+L.en={name:"English",rows:["ITLISASTIME","ACQUARTERDC","TWENTYFIVEX","HALFBTENFTO","PASTERUNINE","ONESIXTHREE","FOURFIVETWO","EIGHTELEVEN","SEVENTWELVE","TENSEOCLOCK"],
+W:{IT:[0,0,2],IS:[0,3,2],QUARTER:[1,2,7],TWENTY:[2,0,6],MF:[2,6,4],HALF:[3,0,4],MT:[3,5,3],TO:[3,9,2],PAST:[4,0,4],OCLOCK:[9,5,6],
+ h1:[5,0,3],h2:[6,8,3],h3:[5,6,5],h4:[6,0,4],h5:[6,4,4],h6:[5,3,3],h7:[8,0,5],h8:[7,0,5],h9:[4,7,4],h10:[9,0,3],h11:[7,5,6],h12:[8,5,6]},
+f(H,M){const q=M/5|0;let h=H%12||12;if(q>=7)h=h%12+1;
+ const t=[["OCLOCK"],["MF","PAST"],["MT","PAST"],["QUARTER","PAST"],["TWENTY","PAST"],["TWENTY","MF","PAST"],["HALF","PAST"],["TWENTY","MF","TO"],["TWENTY","TO"],["QUARTER","TO"],["MT","TO"],["MF","TO"]][q];
+ return ["IT","IS"].concat(t,hours(h));}};
+
+L.fr={name:"Français",rows:["ILNESTDEUXQ","QUATRETROIS","CINQSEPTSIX","HUITNEUFUNE","ONZEDIXMIDI","MINUITETLEX","HEURESMOINS","VINGTQUARTX","DIXCINQLUNE","DEMIESOLEIL"],
+W:{IL:[0,0,2],EST:[0,3,3],ET:[5,6,2],LE:[5,8,2],HEURE:[6,0,5],HEURES:[6,0,6],MOINS:[6,6,5],VINGT:[7,0,5],QUART:[7,5,5],DIX:[8,0,3],CINQ:[8,3,4],DEMIE:[9,0,5],
+ h1:[3,8,3],h2:[0,6,4],h3:[1,6,5],h4:[1,0,6],h5:[2,0,4],h6:[2,8,3],h7:[2,4,4],h8:[3,0,4],h9:[3,4,4],h10:[4,4,3],h11:[4,0,4],MIDI:[4,7,4],MINUIT:[5,0,6]},
+f(H,M){const q=M/5|0;let h=(H+(q>=7?1:0))%24;
+ const w=["IL","EST"];
+ if(h===0)w.push("MINUIT");else if(h===12)w.push("MIDI");else{const n=h%12;w.push("h"+n,n===1?"HEURE":"HEURES");}
+ const t=[[],["CINQ"],["DIX"],["ET","QUART"],["VINGT"],["VINGT","CINQ"],["ET","DEMIE"],["MOINS","VINGT","CINQ"],["MOINS","VINGT"],["MOINS","LE","QUART"],["MOINS","DIX"],["MOINS","CINQ"]][q];
+ return w.concat(t);}};
+
+L.es={name:"Español",rows:["ESONELASUNA","DOSTRESDIEZ","CUATROCINCO","SEISASIETEN","OCHONUEVEYM","ONCEDOCELUZ","MENOSCINCOX","VEINTEDIEZX","VEINTICINCO","CUARTOMEDIA"],
+W:{ES:[0,0,2],SON:[0,1,3],LA:[0,5,2],LAS:[0,5,3],Y:[4,9,1],MENOS:[6,0,5],MC:[6,5,5],VEINTE:[7,0,6],MD:[7,6,4],VEINTICINCO:[8,0,11],CUARTO:[9,0,6],MEDIA:[9,6,5],
+ h1:[0,8,3],h2:[1,0,3],h3:[1,3,4],h10:[1,7,4],h4:[2,0,6],h5:[2,6,5],h6:[3,0,4],h7:[3,5,5],h8:[4,0,4],h9:[4,4,5],h11:[5,0,4],h12:[5,4,4]},
+f(H,M){const q=M/5|0;let h=H%12||12;if(q>=7)h=h%12+1;
+ const w=h===1?["ES","LA"]:["SON","LAS"];w.push(hours(h));
+ const t=[[],["Y","MC"],["Y","MD"],["Y","CUARTO"],["Y","VEINTE"],["Y","VEINTICINCO"],["Y","MEDIA"],["MENOS","VEINTICINCO"],["MENOS","VEINTE"],["MENOS","CUARTO"],["MENOS","MD"],["MENOS","MC"]][q];
+ return w.concat(t);}};
+
+const grid=document.getElementById('grid'),dots=[...document.querySelectorAll('.dot')],bar=document.getElementById('langs');
+const cells=[];for(let i=0;i<110;i++){const s=document.createElement('span');grid.appendChild(s);cells.push(s)}
+let cur="de";
+try{const s=localStorage.getItem('wortuhr-lang');if(s&&L[s])cur=s}catch(e){}
+
+function setLang(k){
+  cur=k;const lg=L[k];
+  lg.rows.forEach((r,y)=>[...r].forEach((ch,x)=>cells[y*11+x].textContent=ch));
+  document.documentElement.lang={de:"de",sw:"de",en:"en",fr:"fr",es:"es"}[k];
+  [...bar.children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+  try{localStorage.setItem('wortuhr-lang',k)}catch(e){}
+  render();
+}
+Object.keys(L).forEach(k=>{const b=document.createElement('button');b.textContent=L[k].name;b.dataset.k=k;
+  b.onclick=()=>setLang(k);bar.appendChild(b)});
+
+function render(){
+  const d=new Date(),lg=L[cur],on=new Set();
+  lg.f(d.getHours(),d.getMinutes()).forEach(k=>{const p=lg.W[k];if(!p)return;const[r,c,l]=p;for(let i=0;i<l;i++)on.add(r*11+c+i)});
+  cells.forEach((s,i)=>s.classList.toggle('on',on.has(i)));
+  const e=d.getMinutes()%5;dots.forEach((x,i)=>x.classList.toggle('on',i<e));
+}
+setLang(cur);
+setInterval(render,1000);
+document.getElementById('frame').addEventListener('click',()=>{
+  const r=document.documentElement;
+  const dark=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0c0d0f';
+  r.dataset.theme=dark?'light':'dark';
+});
+</script>
+</body>
+</html>
